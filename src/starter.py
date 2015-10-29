@@ -10,9 +10,11 @@ import os
 requests.packages.urllib3.disable_warnings()
 
 # open db
-d = shelve.open('results')
-data = d["data"]
-d.close()
+try:
+    d = shelve.open('results', flag='r')
+    data = d["data"]
+finally:
+    d.close()
 
 taxonomy = {
     "Root": ["Computers", "Health", "Sports"],
@@ -20,7 +22,6 @@ taxonomy = {
     "Sports": ["Basketball", "Soccer"],
     "Health": ["Diseases", "Fitness"]
 }
-
 
 def getFileName(category):
     return category.lower() + '.txt'
