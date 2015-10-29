@@ -9,6 +9,18 @@ import os
 # Hack for turning off SSLWarning on CLIC machines :|
 requests.packages.urllib3.disable_warnings()
 
+# open db
+d = shelve.open('results')
+data = d["data"]
+d.close()
+
+taxonomy = {
+    "Root": ["Computers", "Health", "Sports"],
+    "Computers": ["Hardware", "Programming"],
+    "Sports": ["Basketball", "Soccer"],
+    "Health": ["Diseases", "Fitness"]
+}
+
 
 def getFileName(category):
     return category.lower() + '.txt'
@@ -39,10 +51,23 @@ def buildMap(database, filename, keyword):
         cache[query] = result[-1]
     return cache
 
+def classifyDb(database, Tc=100, Ts=0.6):
+    results = data[database]
+    summary = {k:sum(v.values()) for k, v in results.iteritems()}
+    categories = ["Root"]
+    for cat in categories:
+        keywords = taxonomy.get(cat)
+        if keywords:
+            N = float(sum([summary[c] for c in keywords]))
+            for keyword in keywords:
+                if summary[keyword] > Tc and summary[keyword]/N > Ts:
+                    categories.append(keyword)
+    return "/".join(categories)
+
 if __name__ == "__main__":
-    #print getQueryCount("fifa.com", "premiership")
-    #print getQueryCount("hardwarecentral.com", "avi file")
-    #print getQueryCount("fifa.com", "avi file")
-    d = shelve.open('results')
-    print d.keys()
-    d.close()
+    database = raw_input("Enter database: ").strip()
+    Tc = int(raw_input("Enter Tc (leave blank for 100): "))
+    Ts = float(raw_input("Enter Ts (leave blank for 0.6): "))
+    print database, "is classified as", classifyDb(database, Tc, Ts)
+
+
