@@ -6,15 +6,6 @@ from starter import readQueryFile
 from hashlib import md5
 import re
 
-def getUrls(database, filename="root.txt"):
-    logger("Building unique sample urls for: " + database)
-    queries = reduce(list.__add__, readQueryFile(filename).itervalues())
-    urls = set()
-    for query in queries:
-        results = get_restricted_results(database, query)[0]["Web"]
-        urls = urls.union(set([r["Url"] for r in results]))
-    return urls
-
 def getPageContent(url):
     logger("Fetching " + url)
     filename = "cache/" + md5(url).hexdigest()
