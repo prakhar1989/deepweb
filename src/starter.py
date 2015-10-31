@@ -26,7 +26,7 @@ def buildQueryUrlMap(database, filename):
     queriesMappings = readQueryFile(filename)
     for keyword, queries in queriesMappings.iteritems():
         cache[keyword] = {}
-        for query in queries[:5]:
+        for query in queries:
             results = bing.get_restricted_results(database, query)[0]
             cache[keyword][query] = {
                 "count": int(results.get('WebTotal')),
