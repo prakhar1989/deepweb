@@ -1,32 +1,13 @@
 import time
 import sys
 import bing
-import shelve
+import crawler
+from config import TAXONOMY, logger
 from collections import defaultdict
 import os
 
-# open db
-p = os.path.dirname(os.path.abspath('__file__'))
-d = shelve.open('results', flag='r')
-try:
-    data = d["data"]
-finally:
-    d.close()
-
-taxonomy = {
-    "Root": ["Computers", "Health", "Sports"],
-    "Computers": ["Hardware", "Programming"],
-    "Sports": ["Basketball", "Soccer"],
-    "Health": ["Diseases", "Fitness"]
-}
-
-def getFileName(category):
-    return category.lower() + '.txt'
-
-def getQueryCount(site, query):
-    results = bing.get_restricted_results(site, query)
-    # TODO: try / catch
-    return (site, query, int(results[0].get('WebTotal')))
+def getFileForCategory(name):
+    return name.lower() + ".txt"
 
 def readQueryFile(filename):
     path = os.path.join(os.path.dirname(os.path.abspath('__file__')), "../data/")
@@ -39,32 +20,72 @@ def readQueryFile(filename):
             mapping[category].append(query)
     return mapping
 
-def buildMap(database, filename, keyword):
+def buildQueryUrlMap(database, filename):
+    logger("Collecting data for " + filename)
     cache = {}
     queriesMappings = readQueryFile(filename)
-    for query in queriesMappings[keyword]:
-        time.sleep(1)
-        result = getQueryCount(database, query)
-        cache[query] = result[-1]
+    for keyword, queries in queriesMappings.iteritems():
+        cache[keyword] = {}
+        for query in queries:
+            results = bing.get_restricted_results(database, query)[0]
+            cache[keyword][query] = {
+                "count": int(results.get('WebTotal')),
+                "urls": [r["Url"] for r in results.get('Web')]
+            }
     return cache
 
 def classifyDb(database, Tc=100, Ts=0.6):
-    if database not in data:
-        raise KeyError(database +  " not found")
-    results = data[database]
-    summary = {k:sum(v.values()) for k, v in results.iteritems()}
-    categories = ["Root"]
+    categories, categoryData = ["Root"], {}
     for cat in categories:
-        keywords = taxonomy.get(cat)
+        logger("Analyzing " + cat + " category")
+        filename = getFileForCategory(cat)
+        keywords = TAXONOMY.get(cat)
         if keywords:
-            N = float(sum([summary[c] for c in keywords]))
-            for keyword in keywords:
-                if summary[keyword] > Tc and summary[keyword]/N > Ts:
-                    categories.append(keyword)
-    return "/".join(categories)
+            queryUrlMap = buildQueryUrlMap(database, filename)
+            categoryData.update(queryUrlMap)
+            keywordCount = {k: sum([q["count"] for q in
+                                    queryUrlMap[k].itervalues()]) for k in keywords}
+
+            N = float(sum(keywordCount.values()))
+            for k, v in keywordCount.items():
+                logger("Coverage for {0} : {1}, Specificity: {2}".format(k, str(v), str(v/N)))
+                if v >= Tc and v/N >= Ts:
+                    logger(">>>>>> Adding " + k + " to category <<<<<<")
+                    categories.append(k)
+    return (categories, categoryData)
+
+
+def getUniqueDocs(keywords, categoryData):
+    """ gets a list of keywords and returns a set of doc urls
+    that have for those keywords """
+    combinedDocs = set()
+    for k in keywords:
+        urls = [x['urls'] for x in categoryData[k].values()]
+        uniqueUrls = reduce(lambda a, b: a.union(b), urls, set())
+        combinedDocs = combinedDocs.union(uniqueUrls)
+    return combinedDocs
+
+def buildContentSummary(categories, categoryData, database):
+    logger("Building the content summary")
+    iters = 2 if len(categories) > 1 else 1
+    keywords = [TAXONOMY.get(cat) for cat in categories[:iters]]
+    for i in iters:
+        keys = reduce(list.__add__, keywords[i:])
+        urls = getUniqueDocs(keys, categoryData)
+        crawler.getContentSummary(database, category, urls)
+
+def runner(database, Tc, Ts):
+    categories, categoryData = classifyDb(database, Tc, Ts)
+    buildContentSummary(categories, categoryData, database)
 
 if __name__ == "__main__":
+    """
     database = raw_input("Enter database: ").strip()
     Tc = int(raw_input("Enter Tc (leave blank for 100): ") or 100)
     Ts = float(raw_input("Enter Ts (leave blank for 0.6): ") or 0.6)
     print database, "is classified as", classifyDb(database, Tc, Ts)
+    """
+    #print buildQueryUrlMap("fifa.com", "root.txt")
+    #print classifyDb("fifa.com")
+    categories, categoryData = classifyDb("fifa.txt")
+    buildContentSummary(categories, categoryData)

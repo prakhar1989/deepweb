@@ -8,7 +8,7 @@ def getUrls(database, filename="root.txt"):
     logger("Building unique sample urls for: " + database)
     queries = reduce(list.__add__, readQueryFile(filename).itervalues())
     urls = set()
-    for query in queries[:5]:
+    for query in queries:
         results = get_restricted_results(database, query)[0]["Web"]
         urls = urls.union(set([r["Url"] for r in results]))
     return urls
@@ -22,7 +22,7 @@ def getPageContent(url):
 def getWords(url):
     content = getPageContent(url)
     end = content.find("\nReferences\n")
-    content = content[:end] if end > 1 else content
+    content = content[:end] if end > 0 else content
     text = re.sub(r'\[(.*?)\]', '', re.sub(r'\n', "", content))
     words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
     return words
@@ -32,9 +32,9 @@ def writeToFile(wordMap, filename):
         for word, count in sorted(wordMap.iteritems()):
             f.write("{0}#{1}#-1.0\n".format(word, count))
 
-def getContentSummary(database, filename='root.txt'):
+def getContentSummary(database, category, documents):
     dfMap = dict()
-    wordList = [getWords(d) for d in getUrls(database, filename)]
+    wordList = [getWords(d) for d in documents]
     logger("Building content summary")
     vocabulary = reduce(lambda a, b: a.union(b), wordList, set())
     for word in vocabulary:
@@ -43,6 +43,3 @@ def getContentSummary(database, filename='root.txt'):
     category = "Root" #TODO: Fix this
     writeToFile(dfMap, "{0}-{1}.txt".format(category, database))
     return dfMap
-
-if __name__ == '__main__':
-    print getContentSummary("fifa.com", "sports.txt")
