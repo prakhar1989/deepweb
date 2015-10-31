@@ -18,7 +18,7 @@ def get_results(query, key=config.ENCODED_KEY):
     return data.get('d').get('results')
 
 def get_restricted_results(site_url, query, key=config.ENCODED_KEY):
-    URL = "https://api.datamarket.azure.com/Data.ashx/Bing/SearchWeb/v1/Composite?Query=%27site%3a{0}%20{1}%27&$top=10&$format=json"
+    URL = "https://api.datamarket.azure.com/Data.ashx/Bing/SearchWeb/v1/Composite?Query=%27site%3a{0}%20{1}%27&$top=4&$format=json"
     url = URL.format(site_url, query)
     headers = {'Authorization': 'Basic ' + key}
     r = requests.get(url, headers=headers)
