@@ -1,13 +1,9 @@
-import requests
 import time
 import sys
 import bing
 import shelve
 from collections import defaultdict
 import os
-
-# Hack for turning off SSLWarning on CLIC machines :|
-requests.packages.urllib3.disable_warnings()
 
 # open db
 p = os.path.dirname(os.path.abspath('__file__'))

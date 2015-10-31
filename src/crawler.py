@@ -27,6 +27,11 @@ def getWords(url):
     words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
     return words
 
+def writeToFile(wordMap, filename):
+    with open(filename, 'w') as f:
+        for word, count in sorted(wordMap.iteritems()):
+            f.write("{0}#{1}#-1.0\n".format(word, count))
+
 def getContentSummary(database, filename='root.txt'):
     dfMap = dict()
     wordList = [getWords(d) for d in getUrls(database, filename)]
@@ -35,7 +40,9 @@ def getContentSummary(database, filename='root.txt'):
     for word in vocabulary:
         matchCount = sum([1 for l in wordList if word in l])
         dfMap[word] = matchCount
+    category = "Root" #TODO: Fix this
+    writeToFile(dfMap, "{0}-{1}.txt".format(category, database))
     return dfMap
 
 if __name__ == '__main__':
-    print getContentSummary("fifa.com")
+    print getContentSummary("fifa.com", "sports.txt")

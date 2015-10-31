@@ -3,24 +3,19 @@ Contains all functions relating to getting queries from Bing.
 Creating seperate files for different search engines allows for a decoupling
 of the algorithm from the search engine.
 """
-import requests
 import config
-
-def get_uri(query):
-    url = "https://api.datamarket.azure.com/Bing/Search/Web?Query=%27{0}%27&$top=10&$format=json"
-    return url.format(query)
-
-def get_results(query, key=config.ENCODED_KEY):
-    url = get_uri(query)
-    headers = {'Authorization': 'Basic ' + key}
-    r = requests.get(url, headers=headers)
-    data = r.json()
-    return data.get('d').get('results')
+import urllib2
+import json
 
 def get_restricted_results(site_url, query, key=config.ENCODED_KEY):
+    query = query.replace(' ', '%20')
     URL = "https://api.datamarket.azure.com/Data.ashx/Bing/SearchWeb/v1/Composite?Query=%27site%3a{0}%20{1}%27&$top=4&$format=json"
     url = URL.format(site_url, query)
     headers = {'Authorization': 'Basic ' + key}
-    r = requests.get(url, headers=headers)
-    data = r.json()
+    req = urllib2.Request(url, headers=headers)
+    resp = urllib2.urlopen(req)
+    data = json.loads(resp.read())
     return data.get('d').get('results')
+
+if __name__ == "__main__":
+    print get_restricted_results("fifa.com", "bayern")
