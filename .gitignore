@@ -54,3 +54,5 @@ nosetests.xml
 *.ana
 *.txt
 *.npy
+
+src/cache

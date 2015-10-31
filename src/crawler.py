@@ -1,7 +1,9 @@
 from subprocess import Popen, PIPE
 from bing import get_restricted_results
+import os
 from config import logger
 from starter import readQueryFile
+from hashlib import md5
 import re
 
 def getUrls(database, filename="root.txt"):
@@ -15,17 +17,26 @@ def getUrls(database, filename="root.txt"):
 
 def getPageContent(url):
     logger("Fetching " + url)
-    p = Popen(["lynx", "--dump", url], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    output, err = p.communicate()
-    return output if not err else None
+    filename = "cache/" + md5(url).hexdigest()
+    content = None
+    if os.path.isfile(filename):
+        with open(filename, 'r') as f:
+            content = f.read()
+    else:
+        p = Popen(["lynx", "--dump", url], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        content, err = p.communicate()
+        with open(filename,'w') as f:
+            f.write(content)
+    return content
 
 def getWords(url):
     content = getPageContent(url)
-    end = content.find("\nReferences\n")
-    content = content[:end] if end > 0 else content
-    text = re.sub(r'\[(.*?)\]', '', re.sub(r'\n', "", content))
-    words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
-    return words
+    if content:
+        end = content.find("\nReferences\n")
+        content = content[:end] if end > 0 else content
+        text = re.sub(r'\[(.*?)\]', '', re.sub(r'\n', "", content))
+        words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
+        return words
 
 def writeToFile(wordMap, filename):
     with open(filename, 'w') as f:
