@@ -35,11 +35,9 @@ def writeToFile(wordMap, filename):
 def getContentSummary(database, category, documents):
     dfMap = dict()
     wordList = [getWords(d) for d in documents]
-    logger("Building content summary")
     vocabulary = reduce(lambda a, b: a.union(b), wordList, set())
     for word in vocabulary:
         matchCount = sum([1 for l in wordList if word in l])
         dfMap[word] = matchCount
-    category = "Root" #TODO: Fix this
     writeToFile(dfMap, "{0}-{1}.txt".format(category, database))
     return dfMap

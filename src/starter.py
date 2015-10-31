@@ -26,7 +26,7 @@ def buildQueryUrlMap(database, filename):
     queriesMappings = readQueryFile(filename)
     for keyword, queries in queriesMappings.iteritems():
         cache[keyword] = {}
-        for query in queries:
+        for query in queries[:5]:
             results = bing.get_restricted_results(database, query)[0]
             cache[keyword][query] = {
                 "count": int(results.get('WebTotal')),
@@ -66,26 +66,23 @@ def getUniqueDocs(keywords, categoryData):
     return combinedDocs
 
 def buildContentSummary(categories, categoryData, database):
-    logger("Building the content summary")
     iters = 2 if len(categories) > 1 else 1
     keywords = [TAXONOMY.get(cat) for cat in categories[:iters]]
-    for i in iters:
+    for i in range(iters):
         keys = reduce(list.__add__, keywords[i:])
         urls = getUniqueDocs(keys, categoryData)
-        crawler.getContentSummary(database, category, urls)
+        logger("Building the content summary for " + categories[i] + \
+               ". Total docs to fetch: " + str(len(urls)))
+        crawler.getContentSummary(database, categories[i], urls)
 
 def runner(database, Tc, Ts):
     categories, categoryData = classifyDb(database, Tc, Ts)
+    logger(">>>>>> Categorization complete: {0}<<<<<<< ".format("/".join(categories)))
     buildContentSummary(categories, categoryData, database)
+    logger("Process Complete")
 
 if __name__ == "__main__":
-    """
     database = raw_input("Enter database: ").strip()
     Tc = int(raw_input("Enter Tc (leave blank for 100): ") or 100)
     Ts = float(raw_input("Enter Ts (leave blank for 0.6): ") or 0.6)
-    print database, "is classified as", classifyDb(database, Tc, Ts)
-    """
-    #print buildQueryUrlMap("fifa.com", "root.txt")
-    #print classifyDb("fifa.com")
-    categories, categoryData = classifyDb("fifa.txt")
-    buildContentSummary(categories, categoryData)
+    runner(database, Tc, Ts)

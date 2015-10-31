@@ -52,4 +52,5 @@ nosetests.xml
 *.p
 *.pkl
 *.ana
+*.txt
 *.npy
