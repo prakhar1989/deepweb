@@ -12,5 +12,12 @@ TAXONOMY = {
     "Health": ["Diseases", "Fitness"]
 }
 
-def logger(s):
-    print "[LOG] " + s[:80] + " ..."
+def logger(s, highlight=False):
+    if highlight:
+        print "[LOG]"
+        print "[LOG]"
+        print "[LOG] " + s
+        print "[LOG]"
+        print "[LOG]"
+    else:
+        print "[LOG] " + s[:80] + " ..."

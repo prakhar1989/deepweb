@@ -45,7 +45,8 @@ def getWords(url):
         return words
 
 def writeToFile(wordMap, filename):
-    filename = "results/" + filename
+    #filename = "results/" + filename
+    filename = os.path.join(RESULTS_PATH, filename)
     with open(filename, 'w') as f:
         for word, count in sorted(wordMap.iteritems()):
             f.write("{0}#{1}#-1.0\n".format(word, count))
