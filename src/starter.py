@@ -31,7 +31,7 @@ def buildQueryUrlMap(database, filename):
     queriesMappings = readQueryFile(filename)
     for keyword, queries in queriesMappings.iteritems():
         cache[keyword] = {}
-        for query in queries[:5]:
+        for query in queries[:2]:
             results = bing.get_restricted_results(database, query)[0]
             cache[keyword][query] = {
                 "count": int(results.get('WebTotal')),
@@ -78,7 +78,7 @@ def buildContentSummary(categories, categoryData, database):
         urls = getUniqueDocs(keys, categoryData)
         logger("Building the content summary for " + categories[i] + \
                ". Total docs to fetch: " + str(len(urls)), highlight=True)
-        crawler.getContentSummary(database, categories[i], urls)
+        crawler.getContentSummary(database, categories[i], urls, categoryData)
 
 def runner(database, Tc, Ts):
     categories, categoryData = classifyDb(database, Tc, Ts)
