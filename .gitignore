@@ -56,3 +56,5 @@ nosetests.xml
 *.npy
 
 src/cache
+cache
+!cache/.gitkeep
