@@ -6,9 +6,23 @@ from starter import readQueryFile
 from hashlib import md5
 import re
 
+CACHE_PATH = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__), os.pardir, 'cache'
+    )
+)
+
+RESULTS_PATH = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__), os.pardir, 'results'
+    )
+)
+
+
 def getPageContent(url):
     logger("Fetching " + url)
-    filename = "cache/" + md5(url).hexdigest()
+    filename = os.path.join(CACHE_PATH, md5(url).hexdigest())
+    #filename = "cache/" + md5(url).hexdigest()
     content = None
     if os.path.isfile(filename):
         with open(filename, 'r') as f:
@@ -16,8 +30,9 @@ def getPageContent(url):
     else:
         p = Popen(["lynx", "--dump", url], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         content, err = p.communicate()
-        with open(filename,'w') as f:
-            f.write(content)
+        if content:
+            with open(filename,'w') as f:
+                    f.write(content)
     return content
 
 def getWords(url):
@@ -30,6 +45,7 @@ def getWords(url):
         return words
 
 def writeToFile(wordMap, filename):
+    filename = "results/" + filename
     with open(filename, 'w') as f:
         for word, count in sorted(wordMap.iteritems()):
             f.write("{0}#{1}#-1.0\n".format(word, count))

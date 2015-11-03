@@ -6,13 +6,18 @@ from config import TAXONOMY, logger
 from collections import defaultdict
 import os
 
+DATA_PATH = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__), os.pardir, 'data'
+    )
+)
+
 def getFileForCategory(name):
     return name.lower() + ".txt"
 
 def readQueryFile(filename):
-    path = os.path.join(os.path.dirname(os.path.abspath('__file__')), "../data/")
     mapping  = defaultdict(list)
-    with open(path + filename) as f:
+    with open(os.path.join(DATA_PATH, filename)) as f:
         for line in f:
             terms = line.split()
             category = terms[0]
@@ -26,7 +31,7 @@ def buildQueryUrlMap(database, filename):
     queriesMappings = readQueryFile(filename)
     for keyword, queries in queriesMappings.iteritems():
         cache[keyword] = {}
-        for query in queries[:5]:
+        for query in queries:
             results = bing.get_restricted_results(database, query)[0]
             cache[keyword][query] = {
                 "count": int(results.get('WebTotal')),
