@@ -2,10 +2,6 @@ venv
 *.py[cod]
 .DS_Store
 
-#Prjoect files
-.idea/
-.script
-
 # C extensions
 *.so
 
@@ -28,21 +24,7 @@ __pycache__
 # Installer logs
 pip-log.txt
 
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-
-# Translations
 *.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-/=1.2
-/1.2
-
 #logs and datafiles
 *.err
 *.log
@@ -58,3 +40,4 @@ nosetests.xml
 src/cache
 cache
 !cache/.gitkeep
+results/*.txt
