@@ -49,6 +49,7 @@ def getWords(url):
         text = re.sub(r'\[(.*?)\]', '', re.sub(r'\n', "", content))
         words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
         return words
+    return []
 
 def writeToFile(wordMap, filename, categoryData):
     # builds a content summary file with the associated filename.
