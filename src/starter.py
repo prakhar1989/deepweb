@@ -2,20 +2,22 @@ import time
 import sys
 import bing
 import crawler
-from config import TAXONOMY, logger
+from config import TAXONOMY, logger, ENCODED_KEY
 from collections import defaultdict
 import os
 
+BING_KEY = None
+
+# path to the data folder
 DATA_PATH = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__), os.pardir, 'data'
     )
 )
 
-def getFileForCategory(name):
-    return name.lower() + ".txt"
-
 def readQueryFile(filename):
+    # generates a category -> query mapping associated 
+    # with a filename
     mapping  = defaultdict(list)
     with open(os.path.join(DATA_PATH, filename)) as f:
         for line in f:
@@ -26,13 +28,14 @@ def readQueryFile(filename):
     return mapping
 
 def buildQueryUrlMap(database, filename):
+    # returns a list of unique urls for a given database.
     logger("Collecting data for " + filename)
     cache = {}
     queriesMappings = readQueryFile(filename)
     for keyword, queries in queriesMappings.iteritems():
         cache[keyword] = {}
-        for query in queries[:2]:
-            results = bing.get_restricted_results(database, query)[0]
+        for query in queries:
+            results = bing.get_restricted_results(database, query, BING_KEY)[0]
             cache[keyword][query] = {
                 "count": int(results.get('WebTotal')),
                 "urls": [r["Url"] for r in results.get('Web')]
@@ -40,10 +43,12 @@ def buildQueryUrlMap(database, filename):
     return cache
 
 def classifyDb(database, Tc=100, Ts=0.6):
+    # classifies a database based on values of
+    # threshold and specificity
     categories, categoryData = ["Root"], {}
     for cat in categories:
         logger("Analyzing " + cat + " category")
-        filename = getFileForCategory(cat)
+        filename = cat.lower() + ".txt"
         keywords = TAXONOMY.get(cat)
         if keywords:
             queryUrlMap = buildQueryUrlMap(database, filename)
@@ -61,8 +66,8 @@ def classifyDb(database, Tc=100, Ts=0.6):
 
 
 def getUniqueDocs(keywords, categoryData):
-    """ gets a list of keywords and returns a set of doc urls
-    that have for those keywords """
+    # gets a list of keywords and returns a set of doc urls
+    # that have for those keywords
     combinedDocs = set()
     for k in keywords:
         urls = [x['urls'] for x in categoryData[k].values()]
@@ -71,6 +76,7 @@ def getUniqueDocs(keywords, categoryData):
     return combinedDocs
 
 def buildContentSummary(categories, categoryData, database):
+    # builds the content summary for a database
     iters = 2 if len(categories) > 1 else 1
     keywords = [TAXONOMY.get(cat) for cat in categories[:iters]]
     for i in range(iters):
@@ -81,6 +87,7 @@ def buildContentSummary(categories, categoryData, database):
         crawler.getContentSummary(database, categories[i], urls, categoryData)
 
 def runner(database, Tc, Ts):
+    # the program runner
     categories, categoryData = classifyDb(database, Tc, Ts)
     logger(">>>>>> Categorization complete: {0}<<<<<<< ".format("/".join(categories)), highlight=True)
     buildContentSummary(categories, categoryData, database)
@@ -90,4 +97,6 @@ if __name__ == "__main__":
     database = raw_input("Enter database: ").strip()
     Tc = int(raw_input("Enter Tc (leave blank for 100): ") or 100)
     Ts = float(raw_input("Enter Ts (leave blank for 0.6): ") or 0.6)
+    key = raw_input("Enter BING account key (leave blank to use author's key): ")
+    BING_KEY = key if key else ENCODED_KEY
     runner(database, Tc, Ts)

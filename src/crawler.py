@@ -7,12 +7,14 @@ from starter import readQueryFile
 from hashlib import md5
 import re
 
+# path to the cache folder
 CACHE_PATH = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__), os.pardir, 'cache'
     )
 )
 
+# path to the results folder
 RESULTS_PATH = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__), os.pardir, 'results'
@@ -21,9 +23,11 @@ RESULTS_PATH = os.path.abspath(
 
 
 def getPageContent(url):
+    # returns the content from the webpage associated with the url
+    # Checks the cache first and if not found, downloads the page
+    # from the internet
     logger("Fetching " + url)
     filename = os.path.join(CACHE_PATH, md5(url).hexdigest())
-    #filename = "cache/" + md5(url).hexdigest()
     content = None
     if os.path.isfile(filename):
         with open(filename, 'r') as f:
@@ -37,6 +41,7 @@ def getPageContent(url):
     return content
 
 def getWords(url):
+    # returns a set of words from a the content of a url
     content = getPageContent(url)
     if content:
         end = content.find("\nReferences\n")
@@ -46,7 +51,9 @@ def getWords(url):
         return words
 
 def writeToFile(wordMap, filename, categoryData):
-    #filename = "results/" + filename
+    # builds a content summary file with the associated filename.
+    # takes as input the category data read from the data files
+    # and map of word document frequencies
     filename = os.path.join(RESULTS_PATH, filename)
     webTotalMap = {}
     for cat in categoryData:
@@ -58,6 +65,8 @@ def writeToFile(wordMap, filename, categoryData):
             f.write("{0}#{1}#{2}\n".format(word, float(count), float(matches)))
 
 def getContentSummary(database, category, documents, categoryData):
+    # generates the content summary for a database and category.
+    # takes as input a set of documents, the primary category additionally.
     wordList = [getWords(d) for d in documents]
     dfMap = dict()
     vocabulary = reduce(lambda a, b: a.union(b), wordList, set())
