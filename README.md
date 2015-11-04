@@ -51,6 +51,8 @@ The `starter.py` file is responsibe for the following -
 
 Lastly, the `cache` folder stores the intermediate output of crawling content of the webpages. The `result` folder conversly stores the generated content summaries.
 
+### Other Info
+For multiple-word entries, I have decided **not** to include multiple-word information in the content summaries.
 
 ### File List
 ```    
