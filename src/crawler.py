@@ -27,7 +27,7 @@ def getPageContent(url):
     # Checks the cache first and if not found, downloads the page
     # from the internet
     logger("Fetching " + url)
-    filename = os.path.join(CACHE_PATH, md5(url).hexdigest())
+    filename = os.path.join(CACHE_PATH, md5(url.encode("ascii", "ignore")).hexdigest())
     content = None
     if os.path.isfile(filename):
         with open(filename, 'r') as f:
