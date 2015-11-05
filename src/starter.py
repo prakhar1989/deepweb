@@ -91,7 +91,8 @@ def runner(database, Tc, Ts):
     categories, categoryData = classifyDb(database, Tc, Ts)
     logger(">>>>>> Categorization complete: {0}<<<<<<< ".format("/".join(categories)), highlight=True)
     buildContentSummary(categories, categoryData, database)
-    logger("Process Complete")
+    logger("Process Complete.")
+    logger("Results generated in " + crawler.RESULTS_PATH)
 
 if __name__ == "__main__":
     database = raw_input("Enter database: ").strip()

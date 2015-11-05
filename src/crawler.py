@@ -26,6 +26,10 @@ def getPageContent(url):
     # returns the content from the webpage associated with the url
     # Checks the cache first and if not found, downloads the page
     # from the internet
+
+    # create folder if it doesnt exist
+    if not os.path.exists(CACHE_PATH):
+        os.makedirs(CACHE_PATH)
     logger("Fetching " + url)
     filename = os.path.join(CACHE_PATH, md5(url.encode("ascii", "ignore")).hexdigest())
     content = None
@@ -40,6 +44,7 @@ def getPageContent(url):
                     f.write(content)
     return content
 
+
 def getWords(url):
     # returns a set of words from a the content of a url
     content = getPageContent(url)
@@ -51,10 +56,15 @@ def getWords(url):
         return words
     return []
 
+
 def writeToFile(wordMap, filename, categoryData):
     # builds a content summary file with the associated filename.
     # takes as input the category data read from the data files
     # and map of word document frequencies
+
+    # create folder if it doesn't exist
+    if not os.path.exists(RESULTS_PATH):
+        os.makedirs(RESULTS_PATH)
     filename = os.path.join(RESULTS_PATH, filename)
     webTotalMap = {}
     for cat in categoryData:
@@ -64,6 +74,7 @@ def writeToFile(wordMap, filename, categoryData):
         for word, count in sorted(wordMap.iteritems()):
             matches = -1 if word not in webTotalMap else webTotalMap[word]
             f.write("{0}#{1}#{2}\n".format(word, float(count), float(matches)))
+
 
 def getContentSummary(database, category, documents, categoryData):
     # generates the content summary for a database and category.
