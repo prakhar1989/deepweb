@@ -27,6 +27,7 @@ def getPageContent(url):
     # Checks the cache first and if not found, downloads the page
     # from the internet
 
+    url = url.encode("ascii", "ignore")
     # create folder if it doesnt exist
     if not os.path.exists(CACHE_PATH):
         os.makedirs(CACHE_PATH)
@@ -55,7 +56,6 @@ def getWords(url):
         words = set([w.lower() for w in re.split(r'\W+', text) if str.isalpha(w)])
         return words
     return []
-
 
 def writeToFile(wordMap, filename, categoryData):
     # builds a content summary file with the associated filename.
