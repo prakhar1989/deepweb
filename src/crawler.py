@@ -1,6 +1,5 @@
 from subprocess import Popen, PIPE
 from itertools import chain
-from bing import get_restricted_results
 import os
 from config import logger
 from starter import readQueryFile

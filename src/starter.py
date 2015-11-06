@@ -2,7 +2,7 @@ import time
 import sys
 import bing
 import crawler
-from config import TAXONOMY, logger, ENCODED_KEY
+from config import TAXONOMY, logger, getEncodedKey
 from collections import defaultdict
 import os
 
@@ -99,5 +99,5 @@ if __name__ == "__main__":
     Tc = int(raw_input("Enter Tc (leave blank for 100): ") or 100)
     Ts = float(raw_input("Enter Ts (leave blank for 0.6): ") or 0.6)
     key = raw_input("Enter BING account key (leave blank to use author's key): ")
-    BING_KEY = key if key else ENCODED_KEY
+    BING_KEY = getEncodedKey(None if key else key)
     runner(database, Tc, Ts)

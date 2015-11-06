@@ -1,9 +1,8 @@
 import base64
 
 #========Bing Parameters===========
-BING_KEY = "Byygq1zI2KKyssKp8UvVe3DV/v6Aa0FEsKrE+pqDa0s"
+BING_KEY = "KD9YWJna9o45c/lPuSlWp3+xVhhJpBd6N/qjfNVXTJ8="
 BING_ID = "0c3454d3-67ce-4558-b4ac-1e95f964cdf5"
-ENCODED_KEY = base64.b64encode("{0}:{1}".format(BING_KEY, BING_KEY))
 
 TAXONOMY = {
     "Root": ["Computers", "Health", "Sports"],
@@ -11,6 +10,10 @@ TAXONOMY = {
     "Sports": ["Basketball", "Soccer"],
     "Health": ["Diseases", "Fitness"]
 }
+
+def getEncodedKey(key):
+    key = BING_KEY if not key else key
+    return base64.b64encode("{0}:{1}".format(key, key))
 
 def logger(s, highlight=False):
     if highlight:
