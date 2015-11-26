@@ -1,13 +1,4 @@
----
-title:  DeepWeb
-author: Assignment 2 - DeepWeb and Content Summary
-geometry: margin=1.15in
-header-includes:
-    - \usepackage{fancyhdr}
-    - \pagestyle{fancy}
-    - \fancyhead[CO,CE]{Advanced Database Systems - Fall 2015}
-    - \fancyhead[LE,RO]{Nov 3, 2015}
----
+# Assignment 2 - DeepWeb and Content Summary
 
 ### Team Member
 Prakhar Srivastav (ps2894)
